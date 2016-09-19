@@ -41,17 +41,22 @@ contains
     implicit none
     real,intent(in) :: A(:,:)
     real,intent(in) :: B(:,:)
-    integer :: m,n,k,ldA,ldB,ldC
+    integer :: m,n,k1,k2,ldA,ldB,ldC
     real :: C(size(A,1),size(B,2))
 
     m = size(A,1)
     n = size(B,2)
-    k = size(A,2)
+    k1 = size(A,2)
+    k2 = size(B,1)
+
+    if(k1.ne.k2) stop 'Matrix multiplication common dimension error'
+
+
     ldA = m
     ldB = size(B,1)
     ldC = m
 
-    call SGEMM('N','N',m,n,k,1.,A,ldA,B,ldB,1.,C,ldC)
+    call SGEMM('N','N',m,n,k1,1.,A,ldA,B,ldB,1.,C,ldC)
   end function dot
 
   ! -- Returns the matrices belonging to the truncated SVD decomposition of a general matrix A(mxn)
@@ -72,7 +77,8 @@ contains
 
     A_copy = A
 
-    write(*,*) 'SVD decomp started ...'
+    write(*,*)
+    write(*,*) 'Truncated SVD (SGESVD) started ...'
     if(m.ge.n) then
       call SVD_truncated_U(A_copy,U,Sdiag,Vt)
     else
@@ -85,7 +91,7 @@ contains
 
   ! -- SVD_truncated_U computes the SVD when m >= n.
   !    A(mxn) = U(mxm)  * S(mxn)  * Vt(nxn)
-  !           = Un(mxn) * Sn(nxn) * Vt(nxn)
+  !           = Un(mxn) * Sn(nxn) * Vt(nxn) (truncated)
   subroutine SVD_truncated_U(a,un,sn,v)
     implicit none
 
@@ -110,8 +116,7 @@ contains
     call SGESVD(jobu,jobv,m,n,a,lda,sn,un,ldu,v,ldv,work,lwork,info)
 
     if (info.eq.0) then
-      write(*,'(a)')     ' SVD_truncated_U:'
-      write(*,'(a)')     ' SGESVD computation was successful.'
+      write(*,'(a)')     ' Decomposition finished successfuly.'
     else
       write(*,*)
       write(*,'(a)')     ' SVD_truncated_U - Warning!'
@@ -121,7 +126,7 @@ contains
 
   ! -- SVD_truncated_V computes the SVD when m < n.
   !    A(mxn) = U(mxm) * S(mxn)  * Vt(nxn)
-  !           = U(mxm) * Sm(mxm) * Vtm(mxn)
+  !           = U(mxm) * Sm(mxm) * Vtm(mxn) (truncated)
   subroutine SVD_truncated_V(a,u,sm,vm)
     implicit none
 
@@ -147,8 +152,7 @@ contains
 
     if (info.eq.0) then
       write(*,*)
-      write(*,'(a)')     ' SVD_truncated_V:'
-      write(*,'(a)')     ' SGESVD computation was successful.'
+      write(*,'(a)')     ' Decomposition finished successfuly.'
     else
       write(*,*)
       write(*,'(a)')     ' SVD_truncated_V - Warning!'
@@ -192,7 +196,7 @@ contains
     end if
   end subroutine eigenvalues
 
-  ! -- Subrotuine to print the eigenvalues (WR,WI) in a compact way.
+  ! -- Subroutine to print the eigenvalues (WR,WI) in a compact way.
   subroutine print_eigenvalues(desc,WR,WI)
     implicit none
     character*(*),intent(in) ::  desc
@@ -205,13 +209,13 @@ contains
     write(*,*) desc
     do i = 1,n
        if(WI(i).eq.0.0 ) then
-          write(*,9998,advance='no') WR(i)
+          write(*,9998) WR(i)
        else
-          write(*,9999,advance='no') WR(i),WI(i)
+          write(*,9999) WR(i),WI(i)
        end if
     end do
     write(*,*)
-    9998 format(11(:,1x,f6.2))
+    9998 format(11(:,1x,f12.7))
     9999 format(11(:,1x,'(',f6.2,',',f6.2,')'))
   end subroutine print_eigenvalues
 
