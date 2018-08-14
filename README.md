@@ -9,9 +9,7 @@ September 2016
 Some procedures within the module have been extracted from other sources.
 See the Wiki for more details: https://github.com/b-fg/LAPACK-Helper/wiki
 
-=================
-
-LAPACK INSTALLATION:
+## LAPACK Library installation:
  - LAPACK can be installed with make. Configuration have to be set in the
  make.inc file. A make.inc.example for a Linux machine running GNU compilers
  is given in the main directory. Some specific make.inc are also available in
@@ -26,5 +24,3 @@ LAPACK INSTALLATION:
  http://www.netlib.org/lapack/#_faq
  A User forum is also available to help you with the LAPACK library at
  http://icl.cs.utk.edu/lapack-forum/
-
-================
